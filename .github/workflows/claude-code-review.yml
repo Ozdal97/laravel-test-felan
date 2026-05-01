@@ -30,6 +30,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
           prompt: |
             Bu pull request'i incele.
 
@@ -42,7 +44,11 @@ jobs:
             - Kritik sorunları (güvenlik, bug, breaking change) **🚨 BLOCKER**
               olarak işaretle.
             - Öneri seviyesindeki yorumları **💡 Suggestion** olarak işaretle.
-            - Spesifik satırlara inline review comment bırak.
-            - Sonunda kısa bir genel özet yaz.
+            - Spesifik satırlara inline yorum bırakmak için
+              `mcp__github_inline_comment__create_inline_comment` tool'unu kullan
+              (`confirmed: true` ile).
+            - Genel özet için `gh pr comment` kullan.
 
-            Eğer kod kaliteli ve sorun yoksa bunu da açıkça belirt.
+            Eğer kod kaliteli ve sorun yoksa bunu da `gh pr comment` ile belirt.
+            ÖNEMLİ: İnceleme bittikten sonra MUTLAKA en az bir yorum bırak —
+            sessiz kalma.
