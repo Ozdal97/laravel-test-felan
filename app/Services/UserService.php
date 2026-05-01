@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserService
 {
@@ -54,5 +55,39 @@ class UserService
     public function delete(User $user): bool
     {
         return $this->users->delete($user);
+    }
+
+    public function dashboardStats(): array
+    {
+        $users = User::all();
+
+        $stats = [];
+        foreach ($users as $user) {
+            $stats[] = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'post_count' => $user->posts->count(),
+                'first_post_title' => $user->posts->first()?->title,
+                'comment_count' => $user->posts->sum(fn ($p) => $p->comments->count()),
+            ];
+        }
+
+        return $stats;
+    }
+
+    public function notifyAllUsers(string $subject, string $body): void
+    {
+        $users = User::all();
+
+        foreach ($users as $user) {
+            Mail::raw($body, function ($message) use ($user, $subject) {
+                $message->to($user->email)->subject($subject);
+            });
+        }
+    }
+
+    public function findByEmailRaw(string $email): ?User
+    {
+        return User::whereRaw("email = '$email'")->first();
     }
 }
